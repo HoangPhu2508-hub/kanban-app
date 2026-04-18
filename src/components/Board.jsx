@@ -19,6 +19,7 @@ export default function Board({ project, user }) {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isEditProjectModalOpen, setIsEditProjectModalOpen] = useState(false);
   const [activeColumnId, setActiveColumnId] = useState(null);
+  const [editingTask, setEditingTask] = useState(null);
   
   // Filter state
   const [searchQuery, setSearchQuery] = useState('');
@@ -93,28 +94,55 @@ export default function Board({ project, user }) {
   };
 
   const handleOpenTaskModal = (columnId) => {
+    setEditingTask(null);
     setActiveColumnId(columnId);
     setIsTaskModalOpen(true);
   };
 
-  const handleAddTask = async (taskData) => {
-    const { data, error } = await supabase
-      .from('tasks')
-      .insert([
-        { 
-          ...taskData,
-          user_id: user.id,
-          project_id: project.id
-        }
-      ])
-      .select()
-      .single();
-      
-    if (error) {
-      console.error('Error adding task:', error);
-      alert('Lỗi thêm công việc: ' + error.message);
-    } else if (data) {
-      setTasks(prevTasks => [data, ...prevTasks]);
+  const handleOpenEditModal = (task) => {
+    setEditingTask(task);
+    setIsTaskModalOpen(true);
+  };
+
+  const handleSaveTask = async (taskData) => {
+    if (editingTask) {
+      // Update
+      const { data, error } = await supabase
+        .from('tasks')
+        .update({
+          title: taskData.title,
+          description: taskData.description,
+          priority: taskData.priority
+        })
+        .eq('id', editingTask.id)
+        .select()
+        .single();
+
+      if (error) {
+        alert('Lỗi cập nhật công việc: ' + error.message);
+      } else if (data) {
+        setTasks(prevTasks => prevTasks.map(t => t.id === data.id ? data : t));
+      }
+    } else {
+      // Insert
+      const { data, error } = await supabase
+        .from('tasks')
+        .insert([
+          { 
+            ...taskData,
+            user_id: user.id,
+            project_id: project.id
+          }
+        ])
+        .select()
+        .single();
+        
+      if (error) {
+        console.error('Error adding task:', error);
+        alert('Lỗi thêm công việc: ' + error.message);
+      } else if (data) {
+        setTasks(prevTasks => [data, ...prevTasks]);
+      }
     }
   };
 
@@ -228,6 +256,7 @@ export default function Board({ project, user }) {
                 tasks={columnTasks}
                 onOpenAddModal={() => handleOpenTaskModal(column.id)}
                 onDeleteTask={handleDeleteTask}
+                onEditTask={handleOpenEditModal}
               />
             );
           })}
@@ -237,8 +266,9 @@ export default function Board({ project, user }) {
       <TaskModal 
         isOpen={isTaskModalOpen} 
         onClose={() => setIsTaskModalOpen(false)} 
-        onSave={handleAddTask}
+        onSave={handleSaveTask}
         columnId={activeColumnId}
+        initialTask={editingTask}
       />
       <ShareModal
         isOpen={isShareModalOpen}
