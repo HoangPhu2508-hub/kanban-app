@@ -1,19 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-export default function TaskModal({ isOpen, onClose, onSave, columnId }) {
+export default function TaskModal({ isOpen, onClose, onSave, columnId, initialTask }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState('Medium');
+
+  useEffect(() => {
+    if (initialTask) {
+      setTitle(initialTask.title || '');
+      setDescription(initialTask.description || '');
+      setPriority(initialTask.priority || 'Medium');
+    } else {
+      setTitle('');
+      setDescription('');
+      setPriority('Medium');
+    }
+  }, [initialTask, isOpen]);
 
   if (!isOpen) return null;
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!title.trim()) return;
-    onSave({ title, description, priority, status: columnId });
-    setTitle('');
-    setDescription('');
-    setPriority('Medium');
+    
+    const taskData = { title, description, priority };
+    if (initialTask) {
+      taskData.id = initialTask.id;
+    } else {
+      taskData.status = columnId;
+    }
+    
+    onSave(taskData);
     onClose();
   };
 
@@ -28,7 +45,9 @@ export default function TaskModal({ isOpen, onClose, onSave, columnId }) {
       zIndex: 1000
     }}>
       <div className="glass-panel" style={{ padding: '2rem', width: '400px', maxWidth: '90%' }}>
-        <h2 style={{ marginBottom: '1rem' }}>Thêm công việc mới</h2>
+        <h2 style={{ marginBottom: '1rem' }}>
+          {initialTask ? 'Chỉnh sửa công việc' : 'Thêm công việc mới'}
+        </h2>
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div>
             <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Tiêu đề *</label>
@@ -68,7 +87,9 @@ export default function TaskModal({ isOpen, onClose, onSave, columnId }) {
           </div>
           <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
             <button type="button" className="btn-ghost" onClick={onClose} style={{ flex: 1 }}>Hủy</button>
-            <button type="submit" className="btn-primary" style={{ flex: 1 }}>Lưu</button>
+            <button type="submit" className="btn-primary" style={{ flex: 1 }}>
+              {initialTask ? 'Cập nhật' : 'Lưu'}
+            </button>
           </div>
         </form>
       </div>
