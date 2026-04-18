@@ -1,6 +1,6 @@
 import React from 'react';
 import { Draggable } from '@hello-pangea/dnd';
-import { Trash2, AlertCircle } from 'lucide-react';
+import { Trash2, AlertCircle, Edit3 } from 'lucide-react';
 
 const PRIORITY_COLORS = {
   Low: '#34d399',    // Green
@@ -14,7 +14,7 @@ const PRIORITY_LABELS = {
   High: 'Cao'
 };
 
-export default function Card({ task, index, onDeleteTask }) {
+export default function Card({ task, index, onDeleteTask, onEditTask }) {
   return (
     <Draggable draggableId={task.id} index={index}>
       {(provided, snapshot) => (
@@ -40,14 +40,24 @@ export default function Card({ task, index, onDeleteTask }) {
             <span style={{ fontSize: '1rem', fontWeight: '500', lineHeight: '1.4' }}>
               {task.title}
             </span>
-            <button 
-              className="btn-ghost" 
-              style={{ padding: '4px', color: 'var(--text-secondary)' }}
-              onClick={() => onDeleteTask(task.id)}
-              title="Xóa công việc"
-            >
-              <Trash2 size={16} />
-            </button>
+            <div style={{ display: 'flex', gap: '4px' }}>
+              <button 
+                className="btn-ghost" 
+                style={{ padding: '4px', color: 'var(--text-secondary)' }}
+                onClick={() => onEditTask(task)}
+                title="Sửa công việc"
+              >
+                <Edit3 size={16} />
+              </button>
+              <button 
+                className="btn-ghost" 
+                style={{ padding: '4px', color: 'var(--text-secondary)' }}
+                onClick={() => onDeleteTask(task.id)}
+                title="Xóa công việc"
+              >
+                <Trash2 size={16} />
+              </button>
+            </div>
           </div>
           
           {task.description && (
