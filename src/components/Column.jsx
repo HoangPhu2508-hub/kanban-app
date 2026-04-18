@@ -3,7 +3,7 @@ import { Droppable } from '@hello-pangea/dnd';
 import Card from './Card';
 import { Plus } from 'lucide-react';
 
-export default function Column({ column, tasks, onOpenAddModal, onDeleteTask }) {
+export default function Column({ column, tasks, onOpenAddModal, onDeleteTask, onEditTask }) {
   return (
     <div 
       className="glass-panel"
