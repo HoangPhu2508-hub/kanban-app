@@ -60,6 +60,7 @@ export default function Column({ column, tasks, onOpenAddModal, onDeleteTask }) 
                 task={task} 
                 index={index} 
                 onDeleteTask={onDeleteTask}
+                onEditTask={onEditTask}
               />
             ))}
             {provided.placeholder}
