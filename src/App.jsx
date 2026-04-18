@@ -14,18 +14,27 @@ function App() {
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      if (session) fetchProjects();
-      else setLoading(false);
+    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      console.log('Session initial check:', currentSession);
+      setSession(currentSession);
+      if (currentSession) {
+        fetchProjects();
+      } else {
+        setLoading(false);
+      }
+    }).catch(err => {
+      console.error('Auth check error:', err);
+      setLoading(false);
     });
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      if (session) fetchProjects();
-      else {
+    } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      console.log('Auth state changed:', _event, newSession);
+      setSession(newSession);
+      if (newSession) {
+        fetchProjects();
+      } else {
         setProjects([]);
         setCurrentProject(null);
         setLoading(false);
